@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Chrome Video Socket Issue</title>
+    <style>
+      video {
+        width: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <p id="files">
+      <label><input type="checkbox" data-file="1.mp4" />1</label>
+      <label><input type="checkbox" data-file="2.mp4" />2</label>
+      <label><input type="checkbox" data-file="3.mp4" />3</label>
+      <label><input type="checkbox" data-file="4.mp4" />4</label>
+      <label><input type="checkbox" data-file="5.mp4" />5</label>
+      <label><input type="checkbox" data-file="6.mp4" />6</label>
+      <label><input type="checkbox" data-file="7.mp4" />7</label>
+    </p>
+
+    <p>
+      <label><input type="checkbox" id="simulate" /> Simulate User Input</label>
+      <label><input type="checkbox" id="reuse" /> Reuse video element</label>
+    </p>
+
+    <div id="video-container"></div>
+
+    <script>
+      var currentVideoElement
+      function getVideoElement(container, reuse) {
+        var video
+
+        if (reuse) {
+          video = currentVideoElement
+          console.log('reusing video element', video)
+        }
+
+        if (!video || !video.length) {
+          video = document.createElement('video')
+          video.setAttribute('controls', true)
+          console.log('created video element', video)
+
+          if (currentVideoElement) {
+            container.removeChild(currentVideoElement)
+          }
+          container.appendChild(video)
+
+          currentVideoElement = video
+        }
+
+        return video
+      }
+
+      var fileCheckboxes = document.querySelectorAll('#files [type="checkbox"]')
+      var videoContainer = document.querySelector('#video-container')
+      var reuseCheckbox = document.querySelector('#reuse')
+      var simulateCheckbox = document.querySelector('#simulate')
+
+      for (var i = 0; i < fileCheckboxes.length; i++) {
+        var checkbox = fileCheckboxes[i]
+
+        checkbox.addEventListener('change', function(e) {
+          var enabled = e.target.checked
+          var file = e.target.getAttribute('data-file')
+          var reuse = reuseCheckbox.checked
+
+          // uncheck all but selected
+          for (var i = 0; i < fileCheckboxes.length; i++) {
+            var c = fileCheckboxes[i]
+            if (c !== e.target) c.checked = false
+          }
+
+          if (enabled) {
+            var video = getVideoElement(videoContainer, reuse)
+            video.src = file
+            video.play()
+          } else {
+            videoContainer.innerHTML = ''
+          }
+        }, false)
+      }
+
+      var interval
+      simulateCheckbox.addEventListener('change', function(e) {
+        var enabled = e.target.checked
+
+        if (enabled) {
+          var index = 0
+          fileCheckboxes[0].click()
+          interval = window.setInterval(function() {
+            index = (index + 1) % fileCheckboxes.length
+            fileCheckboxes[index].click()
+          }, 2000)
+        } else if (interval) {
+          window.clearInterval(interval)
+        }
+      })
+    </script>
+  </body>
+</html>
