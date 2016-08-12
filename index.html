@@ -39,9 +39,12 @@
         if (!video || !video.length) {
           video = document.createElement('video')
           video.setAttribute('controls', true)
+          // video.setAttribute('preload', 'none')
           console.log('created video element', video)
 
           if (currentVideoElement) {
+            // uncomment this to fix the issue
+            // currentVideoElement.src = ''
             container.removeChild(currentVideoElement)
           }
           container.appendChild(video)
@@ -76,7 +79,8 @@
             video.src = file
             video.play()
           } else {
-            videoContainer.innerHTML = ''
+            videoContainer.removeChild(currentVideoElement)
+            currentVideoElement = null
           }
         }, false)
       }
